@@ -4,8 +4,10 @@ This will show a fake "you're under investigation" web page, when someone tries
 to visit a porn-site or other site specified in =stop_fw/redirect_sites.php=.
 The internet is then blocked for some period of time, specified in
 =stop_www/index.php=, instead redirecting to the page/ip given in =stop_apache=.
+
 Start by running =stop_fw/redirect_sites.php= once. Then a crontab-job should be
 set up to run every minute, adding- or deleting mac-addresses in the iptables.
+
 To entirely remove the effects of this scrip, uncomment the entry in the
 =crontab= and restart the firewall.
 
