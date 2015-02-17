@@ -1,0 +1,61 @@
+#<VirtualHost stop.studentergaarden.dk:80>
+<VirtualHost 172.16.0.10:80>
+	ServerAdmin pawse@studentergaarden.dk
+	ServerName stop.studentergaarden.dk
+	ServerAlias stop
+	
+        #
+        # Logging
+        # ------
+	ErrorLog /var/log/apache2/stop.studentergaarden.dk_error.log
+        CustomLog /var/log/apache2/stop.studentergaarden.dk_access.log combined
+        CookieLog /var/log/apache2/stop.studentergaarden.dk_cookie.log         
+							
+        #
+        # Rewrite rules
+        # -------------
+        #RewriteEngine On
+		       														
+	DocumentRoot /var/misc_www/stop
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+
+</VirtualHost>
+
+
+
+<VirtualHost 172.16.0.11:80>
+	ServerAdmin pawse@studentergaarden.dk
+	ServerName kittenwar.studentergaarden.dk
+	ServerAlias kittenwar
+
+		
+        #
+        # Logging
+        # ------
+	ErrorLog /var/log/apache2/kittenwar.studentergaarden.dk_error.log
+        CustomLog /var/log/apache2/kittenwar.studentergaarden.dk_access.log combined
+        CookieLog /var/log/apache2/kittenwar.studentergaarden.dk_cookie.log         
+							
+        #
+        # Rewrite rules
+        # -------------
+#	ProxyPreserveHost On
+	ProxyPass / http://change.the.url.and.put.in.your.name.youarelame.com/
+#	ProxyPassReverse / http://change.the.url.and.put.in.your.name.youarelame.com/
+
+	#Options +FollowSymlinks
+        #RewriteEngine On
+	#Redirect / http://www.kittenwar.com/
+	
+	       														
+	DocumentRoot /var/misc_www/stop
+	<Location />
+		   Order deny,allow
+        	   Allow from all
+		   Options FollowSymLinks
+	</Location>
+
+</VirtualHost>

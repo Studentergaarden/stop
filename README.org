@@ -1,0 +1,92 @@
+* Just for fun
+
+This will show a fake "you're under investigation" web page, when someone tries
+to visit a porn-site or other site specified in =stop_fw/redirect_sites.php=.
+The internet is then blocked for some period of time, specified in
+=stop_www/index.php=, instead redirecting to the page/ip given in =stop_apache=.
+Start by running =stop_fw/redirect_sites.php= once. Then a crontab-job should be
+set up to run every minute, adding- or deleting mac-addresses in the iptables.
+To entirely remove the effects of this scrip, uncomment the entry in the
+=crontab= and restart the firewall.
+
+#+BEGIN_SRC sh
+cd /etc/firewall/
+/etc/init.d/firewall restart
+#+END_SRC
+
+* Decrypting =dbconnect.inc.php=
+
+=dbconnect.inc.php= contains usernames and passwords for connecting to the
+MySQL databases on =Loki= and =Dragon= and thus are encrypted using [[https://www.agwa.name/projects/git-crypt/][git-crypt]].
+They are encrypted using PGP and the nu@tudentergaarden.dk public key.
+
+To decrypt, the corresponding private key is needed. This key is already
+installed on the root account on =Dragon=. The only thing needed after 
+=git clone= on =Dragon= is 
+
+#+BEGIN_SRC sh
+git-crypt unlock
+#+END_SRC
+The pass phrase is the same as the one for the root user account.
+
+* Install
+
+In short, logon to Dragon(the firewall) and do the following
+(remember that you need to give the full path, when making the soft links.)
+#+BEGIN_SRC sh
+ssh user@dragon
+git clone git@github.com:Studentergaarden/stop.git
+# or maybe
+git clone https://github.com/Studentergaarden/stop.git
+cd stop
+git-crypt unlock
+ln -s /full/path/stop_www /var/misc_www/stop
+ln -s /full/path/stop_apache /etc/apache2/sites-available/stop
+ln -s /full/path/stop_fw /etc/firewall/stop
+ifconfig eth2:0 172.16.0.10
+ifconfig eth2:1 172.16.0.11
+a2ensite stop
+apache2ctl -k graceful
+php /etc/firewall/stop/redirect_sites.php
+#+END_SRC
+
+** Firewall
+
+Copy( or make symbolic link) =stop_fw= to =/etc/firewall/stop= and add the
+following to the crontab file =/etc/firewall/crontab=
+#+BEGIN_SRC sh
+* *   * * *   root   /usr/bin/nice /etc/firewall/stop/unblock_macs.php          # every minute
+#+END_SRC
+
+** web
+
+Copy =stop_www= to =/var/misc_www/stop= and =stop_apache= to
+=/etc/apache2/sites-available/stop=. Add the file to apache, =a2ensite stop= and
+restart the service, =apache2ctl -k graceful=.
+
+Now, only an virtual ip-address needs to be created.
+
+*** Create virtual ip-address
+**** Temporary
+#+BEGIN_SRC sh
+ifconfig eth2:0 172.16.0.10
+ifconfig eth2:1 172.16.0.11
+#+END_SRC
+
+The above command will create a new virtual network interface based on original
+eth2 physical interface. The only most important condition for creating the
+virtual network interface is the physical network interface, as in our case eth2
+must exists.
+
+**** Permanent
+
+Add to =/etc/network/interfaces=
+#+BEGIN_SRC sh
+iface eth2:0 inet static
+address 123.123.22.22
+netmask 255.255.0.0
+broadcast 172.16.255.255
+#+END_SRC
+
+Restart the network(or add the changes temporary)
+=/etc/init.d/networking restart=
