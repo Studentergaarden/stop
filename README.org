@@ -60,6 +60,23 @@ following to the crontab file =/etc/firewall/crontab=
 * *   * * *   root   /usr/bin/nice /etc/firewall/stop/unblock_macs.php          # every minute
 #+END_SRC
 
+You can see the current =iptables= rules with =iptables-save | less=.
+The following will redirect mac-address 00:1C:25:14:14:9D to 172.16.0.12.
+#+BEGIN_SRC sh
+-A PREROUTING -p tcp -m mac --mac-source 00:1C:25:14:14:9D -j DNAT --to-destination 172.16.0.10
+#+END_SRC
+
+and is achieved by
+#+BEGIN_SRC sh
+iptables -t nat -I PREROUTING -p tcp -m mac --mac-source 00:1c:25:14:14:9d  -j DNAT --to-destination 172.16.0.10
+#+END_SRC
+
+To remove it, type the following
+#+BEGIN_SRC sh
+iptables -t nat -D PREROUTING -p tcp -m mac --mac-source 00:1c:25:14:14:9d  -j DNAT --to-destination 172.16.0.10
+#+END_SRC
+
+
 ** web
 
 Copy =stop_www= to =/var/misc_www/stop= and =stop_apache= to
